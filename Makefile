@@ -1,7 +1,7 @@
 # ==============================================================================
 # Project: SIGNAL LAB
 # File: Makefile
-# Description: Build automation and memory profiling rules for SIGNAL-LAB
+# Description: Build automation, unit testing, and memory profiling rules for SIGNAL-LAB
 # Author: Ibrahim
 # Date: November 2026
 # ==============================================================================
@@ -14,6 +14,7 @@ LDFLAGS = -lm
 SRC_DIR = src
 INC_DIR = include
 BIN_DIR = bin
+TEST_DIR = tests
 
 # Target executable name
 TARGET = $(BIN_DIR)/signal_lab
@@ -21,6 +22,11 @@ TARGET = $(BIN_DIR)/signal_lab
 # Source and Object files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
+
+# Unit test sources, binaries, and core objects (excluding main.o)
+TEST_SRCS = $(wildcard $(TEST_DIR)/*.c)
+TEST_BINS = $(patsubst $(TEST_DIR)/%.c, $(BIN_DIR)/%, $(TEST_SRCS))
+CORE_OBJS = $(filter-out $(BIN_DIR)/main.o, $(OBJS))
 
 # Default rule
 all: directories $(TARGET)
@@ -39,6 +45,17 @@ $(TARGET): $(OBJS)
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Build and run all automated unit tests
+test: all $(TEST_BINS)
+	@for t in $(TEST_BINS); do \
+		./$$t || exit 1; \
+	done
+	@echo "All unit tests passed successfully!"
+
+# Compile individual unit test executables
+$(BIN_DIR)/test_%: $(TEST_DIR)/test_%.c $(CORE_OBJS)
+	$(CC) $(CFLAGS) $< $(CORE_OBJS) -o $@ $(LDFLAGS)
+
 # Clean build artifacts
 clean:
 	rm -rf $(BIN_DIR)/*
@@ -48,4 +65,4 @@ clean:
 valgrind: all
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes $(TARGET)
 
-.PHONY: all directories clean valgrind
+.PHONY: all directories clean valgrind test
