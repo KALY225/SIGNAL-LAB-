@@ -1,5 +1,6 @@
 # SIGNAL LAB — C11 Digital Signal Processing Engine & Virtual Oscilloscope
 
+![CI/CD Build](https://github.com)
 ![C11](https://shields.io)
 ![Platform](https://shields.io)
 ![Valgrind](https://shields.io)
@@ -73,4 +74,3 @@ Full equations, Nyquist-Shannon sampling proofs, quantization step derivations, 
 ## Author
 
 **Ibrahim** — Computer Engineering & Low-Latency Systems Enthusiast.
-
