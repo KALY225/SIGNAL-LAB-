@@ -9,6 +9,7 @@
 #include "../include/signal.h"
 #include "../include/generator.h"
 #include <stdio.h>
+#include "../include/sampling.h"
 
 int main(void) {
     /* Create a 1-second signal sampled at 1000 Hz (1000 samples) */
@@ -24,6 +25,8 @@ int main(void) {
         free_signal(sig);
         return 1;
     }
+    quantize_signal(sig, 3, -2.5, 2.5); 
+
 
     /* Export generated samples to CSV */
     if (export_signal_csv(sig, "data/signal.csv") != 0) {
