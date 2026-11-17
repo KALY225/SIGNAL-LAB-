@@ -10,7 +10,7 @@
 #include "../include/generator.h"
 #include <stdio.h>
 #include "../include/sampling.h"
-
+#include "../include/noise.h"
 int main(void) {
     /* Create a 1-second signal sampled at 1000 Hz (1000 samples) */
     Signal *sig = create_signal(1000, 1000.0);
@@ -25,6 +25,9 @@ int main(void) {
         free_signal(sig);
         return 1;
     }
+    init_noise_seed(0);
+add_white_noise(sig, 0.6);
+
     quantize_signal(sig, 3, -2.5, 2.5); 
 
 
