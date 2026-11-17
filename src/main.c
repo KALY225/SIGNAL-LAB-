@@ -1,7 +1,7 @@
 /*
  * Project: SIGNAL LAB
  * File: main.c
- * Description: Complete signal processing pipeline test (Generate -> Noise -> Filter -> Export)
+ * Description: Complete signal processing pipeline test (Generate -> Noise -> Filter -> DFT -> Export)
  * Author: Ibrahim
  * Date: November 2026
  */
@@ -11,6 +11,7 @@
 #include "../include/sampling.h"
 #include "../include/noise.h"
 #include "../include/filter.h"
+#include "../include/analysis.h"
 #include <stdio.h>
 
 int main(void) {
@@ -44,17 +45,39 @@ int main(void) {
         return 1;
     }
 
-    /* Step 5: Export the cleaned (filtered) signal to CSV */
+    /* Step 5: Export the cleaned (filtered) time-domain signal to CSV */
     if (export_signal_csv(filtered, "data/signal.csv") != 0) {
-        fprintf(stderr, "Error: CSV export failed.\n");
+        fprintf(stderr, "Error: Time-domain CSV export failed.\n");
         free_signal(filtered);
         free_signal(sig);
         return 1;
     }
 
-    printf("Success: Generated, noisy, and filtered 5 Hz signal exported to data/signal.csv\n");
+    /* Step 6: Compute single-sided DFT spectrum and measure latency (Requirement F2) */
+    Spectrum *spec = compute_dft(filtered);
+    if (spec == NULL) {
+        fprintf(stderr, "Error: DFT computation failed.\n");
+        free_signal(filtered);
+        free_signal(sig);
+        return 1;
+    }
 
-    /* Step 6: Free BOTH allocated signals to guarantee zero memory leaks */
+    printf("[Benchmark F2] DFT computed in %.2f us for N=%zu samples\n",
+           spec->compute_time_us, filtered->length);
+
+    /* Step 7: Export the frequency-domain magnitude spectrum to CSV */
+    if (export_spectrum_csv(spec, "data/spectrum.csv") != 0) {
+        fprintf(stderr, "Error: Spectrum CSV export failed.\n");
+        free_spectrum(spec);
+        free_signal(filtered);
+        free_signal(sig);
+        return 1;
+    }
+
+    printf("Success: Time signal and frequency spectrum exported to data/\n");
+
+    /* Step 8: Free all allocated heap structures to guarantee zero memory leaks */
+    free_spectrum(spec);
     free_signal(filtered);
     free_signal(sig);
     return 0;
